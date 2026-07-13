@@ -193,3 +193,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btnFingerprint').addEventListener('click', registerFingerprint);
 
 }); // Fin DOMContentLoaded
+async function loadModels() {
+    // Esto busca una CARPETA llamada models que esté al mismo nivel que el index.html
+    const MODEL_URL = './models'; 
+    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+}
