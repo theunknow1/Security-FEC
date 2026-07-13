@@ -1,25 +1,3 @@
-Este es un desafío excelente. Para transformar tu código actual en una
-herramienta con potencial de Startup de Seguridad y cumplir con lo que pide tu
-profesor, vamos a realizar una actualización profunda.
-
-Mejoras realizadas:
-
-1.  Enfoque Biométrico (Reconocimiento Facial): He integrado la lógica para usar
-    face-api.js, la librería estándar para detección facial en la web.
-2.  Huella Dactilar (WebAuthn): Añadí la interfaz para el sensor de huellas.
-    Nota tecnológica: Los navegadores no permiten "ver" la huella por
-    privacidad, pero usan el API WebAuthn para validar que el usuario es el
-    dueño del teléfono.
-3.  Diseño "Premium": Refiné el CSS para un look de "Cybersecurity Dashboard"
-    (Vidrio esmerilado, animaciones de escaneo y tipografía moderna).
-4.  Base de Datos Escalable: Estructuré los datos para que el sistema
-    identifique el rol (Estudiante/Profesor) y su carrera.
-
-1. El Código (Estructura de alto nivel)
-
-Para que funcione la parte facial en GitHub Pages, necesitarás descargar los
-modelos de face-api.js models y ponerlos en una carpeta llamada /models. Por
-ahora, el código está listo para funcionar.
 
 index.html (Interfaz de Usuario)
 
