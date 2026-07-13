@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 8. EVENTOS Y PWA ---
     document.getElementById('btnFaceRegister').addEventListener('click', registerFace);
-    
+    /* BORRA O COMENTA ESTO TEMPORALMENTE:
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW error", err));
     }
