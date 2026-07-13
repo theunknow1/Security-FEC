@@ -200,3 +200,17 @@ async function loadModels() {
     await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
     await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
 }
+const video = document.getElementById('video')
+
+function startVideo() {
+  navigator.mediaDevices.getUserMedia({ video: {} })
+    .then(stream => video.srcObject = stream)
+    .catch(err => console.error("Error al abrir la cámara: ", err))
+}
+
+// OJO: Debes llamar a startVideo() después de que carguen los modelos
+Promise.all([
+  faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+]).then(startVideo) // Aquí inicia la cámara
