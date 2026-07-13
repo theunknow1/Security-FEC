@@ -1,9 +1,8 @@
-Aquí tienes un README.md profesional, corto y directo, ideal para un repositorio
-de GitHub que busca impresionar a un profesor o posibles reclutadores.
 
-🛡️ SENTINEL AI | Security System
 
-SENTINEL AI es un sistema inteligente de verificación digital diseñado para el
+🛡️ SENTINEL| Security System
+
+SENTINEL  es un sistema inteligente de verificación digital diseñado para el
 control de acceso en instalaciones universitarias. Este proyecto nace de la
 necesidad de transformar la seguridad convencional en un modelo escalable basado
 en biometría e identidad digital, con potencial de convertirse en una startup de
