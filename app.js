@@ -129,3 +129,25 @@ async function registerFingerprint() {
 // Vincular a los botones
 document.getElementById('btnFaceRegister').addEventListener('click', registerFace);
 document.getElementById('btnFingerprint').addEventListener('click', registerFingerprint);
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log("Service Worker Activo"));
+}
+
+// Lógica para el botón de descargar
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+});
+
+document.getElementById('btnDownloadApp').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') console.log('Usuario instaló la app');
+        deferredPrompt = null;
+    } else {
+        alert("Para instalar: En iPhone usa 'Compartir -> Añadir a inicio'. En Android usa los 3 puntos -> 'Instalar aplicación'.");
+    }
+});
