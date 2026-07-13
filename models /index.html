@@ -1,106 +1,150 @@
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<!-- Menú Superior Izquierda (Hamburguesa) -->
-<div class="admin-menu-container">
-    <button id="menuToggle" class="menu-icon">☰</button>
-    <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">MODO ADMINISTRATIVO</div>
-        <button class="nav-btn admin-only" data-target="registro">📝 Registro Estudiantes</button>
-        <button class="nav-btn admin-only" data-target="db-view">📊 Base de Datos</button>
-        <hr>
-        <button class="nav-btn" data-target="escaner">🏠 Inicio (Control Acceso)</button>
-        <div class="app-download-zone">
-            <p>Versión Móvil</p>
-            <button id="btnDownloadApp" class="btn-small">Descargar App</button>
-        </div>
-    </div>
-</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENTINEL AI | Security System</title>
+    
+    <!-- PWA & Mobile Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0c10">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Fonts & Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Scripts Externos (Biometría y QR) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
 
-<div class="container">
-    <header>
-        <div class="logo">SENTINEL<span>AI</span></div>
-        <p id="section-title" class="subtitle">CONTROL DE ACCESO</p>
-    </header>
-
-    <!-- SECCIÓN ESCÁNER (PÚBLICA) -->
-    <section id="escaner" class="tab-content active">
-        <div class="glass-card scanner-box">
-            <div class="camera-viewport">
-                <video id="video" autoplay muted playsinline></video>
-                <canvas id="face-canvas"></canvas>
-            </div>
+    <!-- MENÚ LATERAL (SIDEBAR) -->
+    <nav class="admin-menu-container">
+        <button id="menuToggle" class="menu-icon" aria-label="Abrir menú">☰</button>
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">MODO ADMINISTRATIVO</div>
             
-            <div class="controls">
-                <button id="startScanBtn" class="btn-main">ACTIVAR ESCÁNER BIOMÉTRICO</button>
-            </div>
-
-            <div id="access-result" class="hidden"></div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN REGISTRO (SOLO ADMIN) -->
-    <section id="registro" class="tab-content">
-        <div class="glass-card">
-            <h2>Alta de Nuevo Usuario</h2>
-            <form id="registroForm">
-                <div class="input-grid">
-                    <div class="input-group">
-                        <label>Nombre Completo</label>
-                        <input type="text" id="nombre" placeholder="Nombre y Apellido" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Cédula/ID</label>
-                        <input type="number" id="cedula" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Carrera</label>
-                        <select id="carrera" required>
-                            <option value="Química">Química</option>
-                            <option value="Física">Física</option>
-                            <option value="Matemáticas">Matemáticas</option>
-                            <option value="Computación">Computación</option>
-                            <option value="Antropología">Antropología</option>
-                            <option value="Biología">Biología</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Rol</label>
-                        <select id="rol">
-                            <option value="Estudiante">Estudiante</option>
-                            <option value="Personal">Administrativo</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="biometric-actions">
-                    <button type="button" id="btnFaceRegister" class="btn-biometric">📷 Vincular Rostro</button>
-                    <button type="button" id="btnFingerprint" class="btn-biometric">☝️ Huella Digital</button>
-                </div>
-                <button type="submit" class="btn-main">GUARDAR EN SISTEMA</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- SECCIÓN REGISTROS (SOLO ADMIN) -->
-    <section id="db-view" class="tab-content">
-        <div class="glass-card">
-            <h2>Panel de Control - Usuarios</h2>
-            <div class="table-container">
-                <table id="userTable">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Cédula</th>
-                            <th>Carrera</th>
-                            <th>Acceso</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody"></tbody>
-                </table>
+            <!-- Acciones de Administración (Protegidas por clave en JS) -->
+            <button class="nav-btn admin-only" data-target="registro">📝 Registro Estudiantes</button>
+            <button class="nav-btn admin-only" data-target="db-view">📊 Base de Datos</button>
+            
+            <hr class="sidebar-divider">
+            
+            <!-- Acción Pública -->
+            <button class="nav-btn" data-target="escaner">🏠 Inicio (Control Acceso)</button>
+            
+            <!-- Zona de App Móvil -->
+            <div class="app-download-zone">
+                <p>Versión Móvil</p>
+                <small>Usa el sensor de huella de tu teléfono</small>
+                <button id="btnDownloadApp" class="btn-small">INSTALAR APP</button>
             </div>
         </div>
-    </section>
-</div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container">
+        <header>
+            <div class="logo">SENTINEL<span>AI</span></div>
+            <p id="section-title" class="subtitle">SISTEMA INTELIGENTE DE VERIFICACIÓN</p>
+        </header>
+
+        <!-- 1. SECCIÓN ESCÁNER (PÚBLICA) -->
+        <section id="escaner" class="tab-content active">
+            <div class="glass-card scanner-box">
+                <div class="camera-viewport">
+                    <video id="video" autoplay muted playsinline></video>
+                    <canvas id="face-canvas"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button id="startScanBtn" class="btn-main">ACTIVAR ESCÁNER BIOMÉTRICO</button>
+                </div>
+
+                <div id="access-result" class="hidden">
+                    <!-- Los resultados de validación aparecerán aquí -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SECCIÓN REGISTRO (SÓLO ADMINISTRATIVOS) -->
+        <section id="registro" class="tab-content">
+            <div class="glass-card">
+                <h2>Alta de Nuevo Usuario</h2>
+                <form id="registroForm">
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="nombre">Nombre Completo</label>
+                            <input type="text" id="nombre" placeholder="Nombre y Apellido" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="cedula">Cédula / ID</label>
+                            <input type="number" id="cedula" placeholder="Ej: 12345678" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="carrera">Carrera Universitaria</label>
+                            <select id="carrera" required>
+                                <option value="" disabled selected>Seleccione carrera...</option>
+                                <option value="Química">Química</option>
+                                <option value="Física">Física</option>
+                                <option value="Matemáticas">Matemáticas</option>
+                                <option value="Computación">Computación</option>
+                                <option value="Antropología">Antropología</option>
+                                <option value="Biología">Biología</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="rol">Rol Institucional</label>
+                            <select id="rol" required>
+                                <option value="Estudiante">Estudiante</option>
+                                <option value="Personal">Personal Administrativo</option>
+                                <option value="Profesor">Profesor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Botones Biométricos -->
+                    <div class="biometric-actions">
+                        <button type="button" id="btnFaceRegister" class="btn-biometric">
+                            📷 Vincular Rostro
+                        </button>
+                        <button type="button" id="btnFingerprint" class="btn-biometric">
+                            ☝️ Huella Digital
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn-main">GUARDAR EN SISTEMA</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 3. SECCIÓN REGISTROS / DB (SÓLO ADMINISTRATIVOS) -->
+        <section id="db-view" class="tab-content">
+            <div class="glass-card">
+                <h2>Panel de Control - Usuarios Registrados</h2>
+                <div class="table-container">
+                    <table id="userTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cédula</th>
+                                <th>Carrera</th>
+                                <th>Acceso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- Datos inyectados por JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Lógica del Sistema -->
     <script src="app.js"></script>
 </body>
 </html>
