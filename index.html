@@ -17,9 +17,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Scripts Externos (face-api.js) -->
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+       <!-- Carga sincrónica de face-api.js CDN para garantizar disponibilidad global en GitHub Pages -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
 <body>
     <!-- MENÚ LATERAL (SIDEBAR) -->
@@ -30,3 +30,166 @@
             <span class="bar"></span>
         </button>
         <div id="sidebar" class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">SENTINEL</div>
+                <div class="brand-sub">PANEL DE CONTROL</div>
+            </div>
+
+              <div class="nav-section-title">NAVEGACIÓN PRINCIPAL</div>
+            <button class="nav-btn active" data-target="escaner">
+                <span class="nav-icon">🛡️</span> Inicio (Control Acceso)
+            </button>
+            <button class="nav-btn admin-only" data-target="registro">
+                <span class="nav-icon">👤</span> Registro de Usuarios
+            </button>
+            <button class="nav-btn admin-only" data-target="db-view">
+                <span class="nav-icon">📊</span> Base de Datos
+            </button>
+
+             <hr class="sidebar-divider">
+            
+            <div class="app-download-zone">
+                <div class="zone-badge">MÓVIL & PWA</div>
+                <h4>Acceso Portátil</h4>
+                <p>Instala SENTINEL en la pantalla de tu teléfono para una experiencia nativa.</p>
+                <button id="btnDownloadApp" class="btn-small">📲 INSTALAR APP</button>
+            </div>
+        </div>
+    </nav>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <!-- BANNER DE ESTADO DEL SISTEMA / IA -->
+    <div id="system-status-bar" class="status-bar loading">
+        <span id="status-spinner" class="spinner"></span>
+        <span id="status-text">Inicializando motor de Inteligencia Artificial...</span>
+    </div>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container">
+        <header class="app-header">
+            <div class="logo">SENTINEL</div>
+            <p id="section-title" class="subtitle">SISTEMA INTELIGENTE DE VERIFICACIÓN BIOMÉTRICA</p>
+        </header>
+        <!-- 1. SECCIÓN ESCÁNER (PÚBLICA) -->
+        <section id="escaner" class="tab-content active">
+            <div class="glass-card scanner-box">
+                <div class="card-header-flex">
+                    <h2 class="card-title">ESCÁNER BIOMÉTRICO FACIAL</h2>
+                    <div class="camera-controls-mini">
+                        <button id="btnToggleCamera" class="btn-icon" title="Cambiar Cámara (Frontal/Trasera)">🔄 Cambiar Cámara</button>
+                    </div>
+                </div>
+                  <div class="camera-viewport" id="viewport-container">
+                    <video id="video" autoplay muted playsinline></video>
+                    <canvas id="face-canvas"></canvas>
+                    
+                    <div class="camera-overlay-grid"></div>
+                    <div class="scanner-laser" id="scanner-laser"></div>
+                    
+                    <div id="camera-loading" class="camera-placeholder">
+                        <div class="pulse-ring"></div>
+                        <p>Iniciando cámara...</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="startScanBtn" class="btn-main pulse-glow" disabled>
+                        ⏳ CARGANDO MODELOS IA...
+                    </button>
+                </div>
+    <div id="access-result" class="result-banner hidden"></div>
+            </div>
+        </section>
+        <!-- 2. SECCIÓN REGISTRO -->
+        <section id="registro" class="tab-content">
+            <div class="glass-card">
+                <h2 class="card-title">Alta y Vinculación Biométrica</h2>
+                <form id="registroForm">
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="nombre">Nombre Completo</label>
+                            <input type="text" id="nombre" placeholder="Ej: Maria Gonzalez" required autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <label for="cedula">Cédula / Documento ID</label>
+                                <input type="number" id="cedula" placeholder="Ej: 12345678" required autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <label for="carrera">Carrera / Departamento</label>
+                            <select id="carrera" required>
+                                <option value="" disabled selected>Seleccione área...</option>
+                                <option value="Química">Química</option>
+                                <option value="Física">Física</option>
+                                <option value="Matemáticas">Matemáticas</option>
+                                <option value="Computación">Computación</option>
+                                <option value="Antropología">Antropología</option>
+                                <option value="Biología">Biología</option>
+                                <option value="Seguridad / Admin">Seguridad / Admin</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="rol">Rol Institucional</label>
+                            <select id="rol" required>
+                                <option value="Estudiante">Estudiante</option>
+                                <option value="Personal">Personal Administrativo</option>
+                                <option value="Profesor">Profesor</option>
+                                <option value="Visitante">Visitante Autorizado</option>
+                            </select>
+                                </div>
+                    </div>
+                    <div class="biometric-capture-box">
+                        <div class="capture-info">
+                            <h4>Captura de Descriptor Facial</h4>
+                            <p>Sitúate frente a la cámara con buena iluminación y presiona "Capturar Rostro".</p>
+                        </div>
+                        <div class="biometric-actions">
+                            <button type="button" id="btnFaceRegister" class="btn-biometric">
+                                📷 Capturar Rostro
+                            </button>
+                        </div>
+                        <div id="register-status-badge" class="status-badge-info">Esperando captura...</div>
+                    </div>
+                    <button type="submit" id="btnSubmitUser" class="btn-main">REGISTRAR EN SISTEMA</button>
+                </form>
+            </div>
+        </section>
+           <!-- 3. SECCIÓN REGISTROS / DB -->
+        <section id="db-view" class="tab-content">
+            <div class="glass-card">
+                <div class="card-header-flex">
+                    <h2 class="card-title">Usuarios Registrados en Base Local</h2>
+                    <div class="db-actions">
+                        <button id="btnClearDB" class="btn-danger-outline">🗑️ Vaciar DB</button>
+                    </div>
+                </div>
+                
+                <div class="search-bar-container">
+                    <input type="text" id="dbSearch" placeholder="🔍 Buscar por nombre o cédula...">
+                </div>
+                <div class="table-container">
+                    <table id="userTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cédula</th>
+                                <th>Área</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr>
+                                    <td colspan="6" style="text-align: center; color: var(--text-mid);">Cargando registros...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="app-footer">
+        <p>SENTINEL &copy; 2026 - Control de Acceso Biométrico IA | Funciona en Navegador y Móvil</p>
+    </footer>
+    <!-- Lógica del Sistema -->
+    <script src="app.js"></script>
+</body>
+</html>
