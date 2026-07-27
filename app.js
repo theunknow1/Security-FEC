@@ -2,6 +2,7 @@
  * SENTINEL - Sistema Inteligente de Control de Acceso Biométrico
  * Optimizado para GitHub Pages, Navegadores de Escritorio y Teléfonos Móviles
  */
+
 document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. ESTADO Y VARIABLES GLOBALES ---
     let usersDB = JSON.parse(localStorage.getItem('sentinel_db')) || [];
@@ -9,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let isScanning = false;
     let currentFacingMode = 'user'; // 'user' (frontal) o 'environment' (trasera)
     let currentStream = null;
+
     // Elementos DOM
     const video = document.getElementById('video');
     const canvas = document.getElementById('face-canvas');
@@ -22,9 +24,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cameraLoading = document.getElementById('camera-loading');
     const btnToggleCamera = document.getElementById('btnToggleCamera');
     const scannerLaser = document.getElementById('scanner-laser');
-  // --- 2. CARGA ULTRA-ROBUSTA DE MODELOS IA (REPOSITORIO LOCAL + CDN FALLBACK) ---
-    // En GitHub Pages o servidores remotos, las rutas locales pueden dar 404 si faltan archivos.
-    // Usamos CDN de respaldo rápido para garantizar que la app NUNCA se quede congelada en pantalla negra.
+
+    // --- 2. CARGA ULTRA-ROBUSTA DE MODELOS IA (REPOSITORIO LOCAL + CDN FALLBACK) ---
     const BASE_PATH = window.location.pathname.replace(/\/[^\/]*$/, '');
     const MODEL_SOURCES = [
         `${BASE_PATH}/models`,
@@ -33,11 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights',
         'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights'
     ];
+
     async function loadModels() {
         updateStatus("Cargando modelos de IA desde red...", "loading");
-   // Verificamos si face-api.js se cargó correctamente desde el CDN externo
+
         if (typeof faceapi === 'undefined') {
-            console.error("face-api.js no está definido. Verificando script tag...");
+            console.error("face-api.js no está definido.");
             updateStatus("Error: Librería face-api.js no detectada.", "error");
             if (startScanBtn) {
                 startScanBtn.disabled = false;
@@ -46,21 +48,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return;
         }
-                  let loaded = false;
+
+        let loaded = false;
+
         for (const sourceUrl of MODEL_SOURCES) {
             console.log(`[SENTINEL] Intentando cargar modelos desde: ${sourceUrl}`);
             try {
-                // timeout de 8 segundos por origen para evitar bloqueos prolongados
                 const loadPromise = Promise.all([
                     faceapi.nets.ssdMobilenetv1.loadFromUri(sourceUrl),
                     faceapi.nets.tinyFaceDetector.loadFromUri(sourceUrl),
                     faceapi.nets.faceLandmark68Net.loadFromUri(sourceUrl),
                     faceapi.nets.faceRecognitionNet.loadFromUri(sourceUrl)
                 ]);
+
                 const timeoutPromise = new Promise((_, reject) => 
                     setTimeout(() => reject(new Error("Tiempo de espera agotado al cargar modelos")), 8000)
                 );
-                         await Promise.race([loadPromise, timeoutPromise]);
+
+                await Promise.race([loadPromise, timeoutPromise]);
+
                 console.log(`[SENTINEL] ✅ Modelos cargados exitosamente desde: ${sourceUrl}`);
                 loaded = true;
                 break;
@@ -68,6 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.warn(`[SENTINEL] Falló origen ${sourceUrl}:`, err.message || err);
             }
         }
+
         if (loaded) {
             updateStatus("SISTEMA BIOMÉTRICO LISTO", "success");
             if (startScanBtn) {
@@ -75,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 startScanBtn.innerText = "⚡ ACTIVAR ESCÁNER BIOMÉTRICO";
             }
             await startCamera();
-                      } else {
+        } else {
             updateStatus("Modelos localmente no encontrados. Usando cámara en modo básico.", "error");
             if (startScanBtn) {
                 startScanBtn.disabled = false;
@@ -84,6 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await startCamera();
         }
     }
+
     function updateStatus(message, type = "info") {
         if (!systemStatusBar || !statusText) return;
         statusText.innerText = message;
@@ -93,12 +101,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-                           // --- 3. CÁMARA (DESKTOP & MÓVIL) ---
+    // --- 3. CÁMARA (DESKTOP & MÓVIL) ---
     async function startCamera() {
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
         }
+
         if (cameraLoading) cameraLoading.style.display = "flex";
+
         const constraints = {
             video: {
                 facingMode: { ideal: currentFacingMode },
@@ -107,16 +117,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             },
             audio: false
         };
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
             currentStream = stream;
             video.srcObject = stream;
-                      await new Promise((resolve) => {
+
+            await new Promise((resolve) => {
                 video.onloadedmetadata = () => {
                     video.play().catch(e => console.log("Auto-play prevenido:", e));
                     resolve();
                 };
             });
+
             if (cameraLoading) cameraLoading.style.display = "none";
             adjustCanvasSize();
         } catch (err) {
@@ -129,14 +142,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>`;
             }
         }
-                 }
-              function adjustCanvasSize() {
+    }
+
+    function adjustCanvasSize() {
         if (video && canvas && video.videoWidth && video.videoHeight) {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
         }
     }
+
     window.addEventListener('resize', adjustCanvasSize);
+
     if (btnToggleCamera) {
         btnToggleCamera.addEventListener('click', async () => {
             currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
@@ -144,16 +160,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             await startCamera();
         });
     }
+
     // --- 4. SIDEBAR Y MENÚ ---
     const menuToggle = document.getElementById('menuToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
-  function toggleMenu() {
+
+    function toggleMenu() {
         if (sidebar) sidebar.classList.toggle('active');
         if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
     }
+
     if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
+    if (closeSidebar) closeSidebar.addEventListener('click', toggleMenu);
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleMenu);
+
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.dataset.target;
@@ -161,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pass = prompt("Clave de Administrador (1234):");
                 if (pass !== "1234") return alert("Acceso denegado.");
             }
-                     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
             const targetEl = document.getElementById(target);
@@ -170,12 +192,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (target === 'db-view') updateTable();
         });
     });
-            // --- 5. REGISTRO DE ROSTRO ---
+
+    // --- 5. REGISTRO DE ROSTRO ---
     if (btnFaceRegister) {
         btnFaceRegister.addEventListener('click', async () => {
             if (typeof faceapi === 'undefined' || !faceapi.nets.ssdMobilenetv1.params) {
                 return alert("Los modelos de IA aún se están cargando. Aguarde un momento por favor.");
             }
+
             btnFaceRegister.innerText = "⌛ Analizando rostro...";
             btnFaceRegister.disabled = true;
             try {
@@ -183,7 +207,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!detection) {
                     detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
                 }
-     if (detection) {
+
+                if (detection) {
                     currentFaceDescriptor = Array.from(detection.descriptor);
                     btnFaceRegister.innerText = "✅ Rostro Capturado";
                     if (registerStatusBadge) {
@@ -206,15 +231,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-               const registroForm = document.getElementById('registroForm');
+
+    const registroForm = document.getElementById('registroForm');
     if (registroForm) {
         registroForm.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!currentFaceDescriptor) return alert("Captura el rostro primero.");
+
             const nombre = document.getElementById('nombre').value.trim();
             const cedula = document.getElementById('cedula').value.trim();
             const carrera = document.getElementById('carrera').value;
             const rol = document.getElementById('rol').value;
+
             usersDB.push({
                 id: Date.now(),
                 nombre,
@@ -223,7 +251,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 rol,
                 faceData: currentFaceDescriptor
             });
- localStorage.setItem('sentinel_db', JSON.stringify(usersDB));
+
+            localStorage.setItem('sentinel_db', JSON.stringify(usersDB));
             alert(`✅ Usuario "${nombre}" guardado con éxito en SENTINEL.`);
             registroForm.reset();
             currentFaceDescriptor = null;
@@ -234,16 +263,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
- // --- 6. ESCÁNER BIOMÉTRICO EN TIEMPO REAL ---
+
+    // --- 6. ESCÁNER BIOMÉTRICO EN TIEMPO REAL ---
     if (startScanBtn) {
         startScanBtn.addEventListener('click', () => {
             if (usersDB.length === 0) return alert("Base de datos vacía. Registra al menos un usuario primero.");
+
             isScanning = !isScanning;
             startScanBtn.innerText = isScanning ? "🛑 DETENER ESCÁNER" : "⚡ ACTIVAR ESCÁNER BIOMÉTRICO";
             startScanBtn.className = isScanning ? "btn-main btn-danger" : "btn-main pulse-glow";
             if (resultDisplay) resultDisplay.classList.toggle('hidden', !isScanning);
             if (scannerLaser) scannerLaser.style.display = isScanning ? "block" : "none";
-   if (!isScanning) {
+
+            if (!isScanning) {
                 if (canvas) {
                     const ctx = canvas.getContext('2d');
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -251,22 +283,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (resultDisplay) resultDisplay.innerHTML = "";
                 return;
             }
+
             const labeledDescriptors = usersDB.map(u => new faceapi.LabeledFaceDescriptors(u.nombre, [new Float32Array(u.faceData)]));
             const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.55);
+
             async function processScanFrame() {
                 if (!isScanning) return;
                 adjustCanvasSize();
                 const displaySize = { width: video.videoWidth || 640, height: video.videoHeight || 480 };
                 if (canvas) faceapi.matchDimensions(canvas, displaySize);
-      try {
+
+                try {
                     const detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
                         .withFaceLandmarks()
                         .withFaceDescriptors();
+
                     const resizedDetections = faceapi.resizeResults(detections, displaySize);
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                     }
+
                     if (resizedDetections.length > 0) {
                         resizedDetections.forEach(det => {
                             const match = faceMatcher.findBestMatch(det.descriptor);
@@ -275,14 +312,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const labelText = isMatched 
                                 ? `ACCESO CONCEDIDO: ${match.label} (${Math.round((1 - match.distance) * 100)}%)` 
                                 : `DESCONOCIDO - ACCESO DENEGADO`;
+
                             if (canvas) {
-                                new 
-                                            faceapi.draw.DrawBox(box, {
+                                new faceapi.draw.DrawBox(box, {
                                     label: labelText,
                                     boxColor: isMatched ? '#00e676' : '#ff3366',
                                     lineWidth: 3
                                 }).draw(canvas);
                             }
+
                             if (resultDisplay) {
                                 resultDisplay.innerHTML = isMatched 
                                     ? `<div class="access-card granted"><div class="status-icon">✅</div><div><h3>ACCESO PERMITIDO</h3><p class="user-name">${match.label}</p></div></div>`
@@ -290,14 +328,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                         });
                     }
-                   } catch (err) {
+                } catch (err) {
                     console.error("Error en frame de escáner:", err);
                 }
+
                 if (isScanning) setTimeout(processScanFrame, 200);
             }
+
             processScanFrame();
         });
     }
+
     function updateTable() {
         const tbody = document.getElementById('userTableBody');
         if (!tbody) return;
@@ -308,7 +349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         tbody.innerHTML = usersDB.map(u => `
             <tr>
                 <td><strong>${escapeHtml(u.nombre)}</strong></td>
-                  <td>${escapeHtml(u.cedula)}</td>
+                <td>${escapeHtml(u.cedula)}</td>
                 <td>${escapeHtml(u.carrera || 'N/A')}</td>
                 <td><span class="role-badge">${escapeHtml(u.rol || 'Estudiante')}</span></td>
                 <td><span class="status-active">● Activo</span></td>
@@ -316,6 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </tr>
         `).join('');
     }
+
     window.deleteUser = function(id) {
         if (confirm("¿Deseas eliminar este usuario de SENTINEL?")) {
             usersDB = usersDB.filter(u => u.id !== id);
@@ -323,9 +365,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateTable();
         }
     };
+
     function escapeHtml(str) {
         return (str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
-    // Inicializar modelos
+
     loadModels();
 });
