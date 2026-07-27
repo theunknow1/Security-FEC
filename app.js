@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnToggleCamera = document.getElementById('btnToggleCamera');
     const scannerLaser = document.getElementById('scanner-laser');
 
-    // --- 2. CARGA ULTRA-ROBUSTA DE MODELOS IA (REPOSITORIO LOCAL + CDN FALLBACK) ---
+    // --- 2. CARGA ULTRA-ROBUSTA DE MODELOS IA ---
     const BASE_PATH = window.location.pathname.replace(/\/[^\/]*$/, '');
     const MODEL_SOURCES = [
         `${BASE_PATH}/models`,
@@ -161,34 +161,73 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- 4. SIDEBAR Y MENÚ ---
+    // --- 4. CONTROL DE SIDEBAR (PREVENCIÓN DE CIERRE ACCIDENTAL Y NAVEGACIÓN LIMPIA) ---
     const menuToggle = document.getElementById('menuToggle');
     const closeSidebar = document.getElementById('closeSidebar');
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-    function toggleMenu() {
-        if (sidebar) sidebar.classList.toggle('active');
-        if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+    function openMenu() {
+        if (sidebar) sidebar.classList.add('active');
+        if (sidebarOverlay) sidebarOverlay.classList.add('active');
     }
 
-    if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
-    if (closeSidebar) closeSidebar.addEventListener('click', toggleMenu);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleMenu);
+    function closeMenu() {
+        if (sidebar) sidebar.classList.remove('active');
+        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+    }
 
+    if (menuToggle) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (sidebar && sidebar.classList.contains('active')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+    }
+
+    if (closeSidebar) {
+        closeSidebar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeMenu();
+        });
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeMenu();
+        });
+    }
+
+    // Evitar que hacer clic DENTRO del sidebar active el overlay o cierre el menú
+    if (sidebar) {
+        sidebar.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // Botones de navegación dentro del sidebar
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const target = btn.dataset.target;
+
             if (btn.classList.contains('admin-only')) {
                 const pass = prompt("Clave de Administrador (1234):");
                 if (pass !== "1234") return alert("Acceso denegado.");
             }
+
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+
             document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
             const targetEl = document.getElementById(target);
             if (targetEl) targetEl.classList.add('active');
-            if (sidebar && sidebar.classList.contains('active')) toggleMenu();
+
+            closeMenu();
             if (target === 'db-view') updateTable();
         });
     });
